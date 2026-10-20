@@ -11,7 +11,7 @@ export default function Login() {
     setErr('');
     setBusy(role);
     try {
-      const base = 'http://localhost:3000/v1';
+      const base = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/v1';
       const r = await fetch(base + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pwd, expectedRole: role }) });
       const b = await r.json().catch(() => ({}));
       if (!r.ok) { setErr(b.detail || 'E-mail ou senha incorretos.'); return; }
