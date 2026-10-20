@@ -17,35 +17,53 @@ export default function Login() {
       if (!r.ok) { setErr(b.detail || 'E-mail ou senha incorretos.'); return; }
       if (b.token) localStorage.setItem('t', b.token);
       nav(b.role === 'operacoes' ? '/operacoes' : '/catalogo');
-    } catch { setErr('Sem conexao com o servidor.'); }
+    } catch { setErr('Sem conexão com o servidor.'); }
     finally { setBusy(null); }
   }
   return (
-    <div className="login-page">
-      <div className="login-brand">
-        <div style={{ fontWeight: 700, fontSize: 17 }}><span>EMPREST</span><span style={{ color: '#2fb8ac' }}>.AI</span></div>
+    <main className="login-page">
+      <section className="login-brand" aria-label="EMPREST.AI">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true" />
+          <span>EMPREST<span className="brand-accent">.AI</span></span>
+        </div>
         <div className="login-intro">
-          <h1>Emprestimo de equipamentos sem planilha.</h1>
-          <p style={{ opacity: 0.6, fontSize: 16 }}>Peca um notebook, monitor ou camera em segundos.</p>
-        </div>
-        <div className="login-footer" style={{ fontSize: 12, opacity: 0.4 }}>Operacoes - TI interno</div>
-      </div>
-      <div className="login-content">
-        <div className="login-form">
-          <h2 style={{ fontSize: 26, margin: 0 }}>Entrar</h2>
-          <p style={{ fontSize: 14, opacity: 0.55 }}>Use seu e-mail corporativo.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 16 }}>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" style={{ height: 36, padding: '6px 10px', borderRadius: 8, border: '1px solid rgba(233,233,237,0.16)', background: '#232532', color: '#e9e9ed' }} />
-            <input value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="senha" style={{ height: 36, padding: '6px 10px', borderRadius: 8, border: '1px solid rgba(233,233,237,0.16)', background: '#232532', color: '#e9e9ed' }} />
+          <div className="login-pitch">
+            <h1>Empréstimo de equipamentos sem planilha.</h1>
+            <p className="login-pitch-lead">Peça um notebook, monitor ou câmera em segundos.</p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 24 }}>
-            {err !== '' && (<div role="alert" style={{ fontSize: 13, color: '#e88b8b', background: 'rgba(200,90,90,0.14)', border: '1px solid rgba(200,90,90,0.40)', borderRadius: 8, padding: '10px 12px' }}>{err}</div>)}
-            <button disabled={busy !== null} onClick={() => go('colaborador')} style={{ height: 40, background: 'transparent', border: '1px solid #2fb8ac', color: '#2fb8ac', borderRadius: 8, fontWeight: 600 }}>{busy === 'colaborador' ? 'Entrando...' : 'Entrar'}</button>
-            <button disabled={busy !== null} onClick={() => go('operacoes')} style={{ background: 'transparent', border: 'none', color: '#5fcfc4', textAlign: 'left' }}>{busy === 'operacoes' ? 'Entrando...' : 'Entrar como Operacoes'}</button>
-          </div>
-          <p style={{ fontSize: 12, opacity: 0.55, textAlign: 'center' }}>Cada pessoa ve apenas os proprios emprestimos.</p>
+          <dl className="login-stats" aria-label="Regras de empréstimo">
+            <div><dt>3</dt><dd>itens por pessoa</dd></div>
+            <div><dt>14</dt><dd>dias de prazo</dd></div>
+            <div><dt>0</dt><dd>linhas para preencher</dd></div>
+          </dl>
         </div>
-      </div>
-    </div>
+        <footer className="login-footer">Operações · TI interno</footer>
+      </section>
+      <section className="login-content" aria-labelledby="login-title">
+        <form className="login-form" aria-busy={busy !== null} onSubmit={(event) => { event.preventDefault(); void go('colaborador'); }}>
+          <header className="login-heading">
+            <h2 id="login-title">Entrar</h2>
+            <p className="login-lead">Use seu e-mail corporativo.</p>
+          </header>
+          <div className="login-fields">
+            <div className="field">
+              <label htmlFor="login-email">E-mail</label>
+              <input id="login-email" name="email" className="input" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" />
+            </div>
+            <div className="field">
+              <label htmlFor="login-password">Senha</label>
+              <input id="login-password" name="password" className="input" type="password" autoComplete="current-password" value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Sua senha" />
+            </div>
+          </div>
+          <div className="login-actions">
+            {err !== '' && <div role="alert" className="login-error">{err}</div>}
+            <button type="submit" className="btn btn-primary btn-block" disabled={busy !== null}>{busy === 'colaborador' ? 'Entrando…' : 'Entrar'}</button>
+            <button type="button" className="btn btn-ghost btn-block" disabled={busy !== null} onClick={() => void go('operacoes')}>{busy === 'operacoes' ? 'Entrando…' : 'Entrar como Operações →'}</button>
+          </div>
+          <p className="login-note">Cada pessoa vê apenas os próprios empréstimos.</p>
+        </form>
+      </section>
+    </main>
   );
 }
