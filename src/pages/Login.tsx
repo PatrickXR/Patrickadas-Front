@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-type Role = 'colaborador' | 'operacoes';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { isRole, useSession, type Role } from '../session';
 export default function Login() {
   const nav = useNavigate();
+  const { session, signIn } = useSession();
   const [email, setEmail] = useState('');
   const [pwd, setPwd] = useState('');
   const [err, setErr] = useState('');
@@ -15,11 +16,16 @@ export default function Login() {
       const r = await fetch(base + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pwd, expectedRole: role }) });
       const b = await r.json().catch(() => ({}));
       if (!r.ok) { setErr(b.detail || 'E-mail ou senha incorretos.'); return; }
-      if (b.token) localStorage.setItem('t', b.token);
-      nav(b.role === 'operacoes' ? '/operacoes' : '/catalogo');
+      if (typeof b.token !== 'string' || !b.token.trim() || !isRole(b.role) || b.role !== role) {
+        setErr('Não foi possível validar sua sessão. Tente entrar novamente.');
+        return;
+      }
+      signIn({ token: b.token, role: b.role });
+      nav('/home', { replace: true });
     } catch { setErr('Sem conexão com o servidor.'); }
     finally { setBusy(null); }
   }
+  if (session) return <Navigate to="/home" replace />;
   return (
     <main className="login-page">
       <section className="login-brand" aria-label="EMPREST.AI">
