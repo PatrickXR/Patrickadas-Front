@@ -437,3 +437,272 @@ body {
     transition: none;
   }
 }
+
+.app-shell,
+.app-shell * {
+  box-sizing: border-box;
+}
+
+.app-shell {
+  min-height: 100dvh;
+}
+
+.app-shell a {
+  text-decoration: none;
+}
+
+.app-shell a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 30;
+  padding: 10px;
+  transform: translateY(-160%);
+  background: var(--color-surface);
+  color: var(--color-accent-300);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.app-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  min-height: 60px;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--color-divider);
+  background: var(--color-bg);
+}
+
+.app-nav .brand {
+  color: var(--color-text);
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.app-nav .brand-mark {
+  flex-basis: 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+.app-nav nav {
+  display: flex;
+  align-self: stretch;
+}
+
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+}
+
+.nav-tab.active {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.nav-account {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.role-tag {
+  padding: 3px 9px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-label);
+  font-size: var(--font-size-note);
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+  width: 100%;
+  max-width: 1240px;
+  padding: 48px 40px 64px;
+  margin-inline: auto;
+}
+
+.home-content :is(h1, h2, h3, p) {
+  margin: 0;
+}
+
+.home-content :is(h1, h2, h3) {
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
+}
+
+.home-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding-block: var(--space-16);
+}
+
+.home-heading h1 {
+  font-size: var(--font-size-h1);
+}
+
+.home-heading > p:last-child {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-subtitle);
+}
+
+.section-kicker {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-kicker);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  width: 100%;
+}
+
+.section-heading,
+.shortcut-topline,
+.shortcut-action,
+.home-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.section-heading h2 {
+  font-size: var(--font-size-panel);
+}
+
+.section-heading > span,
+.availability-note,
+.home-footer {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-note);
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.shortcut-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.shortcut-number {
+  color: var(--color-accent-400);
+  font-size: var(--font-size-note);
+  font-variant-numeric: lining-nums;
+}
+
+.shortcut-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.shortcut-copy h3 {
+  font-size: var(--font-size-panel);
+}
+
+.shortcut-copy p {
+  color: var(--color-text-label);
+}
+
+.shortcut-action {
+  flex-wrap: wrap;
+  padding-top: var(--space-12);
+  border-top: 1px solid var(--color-divider);
+}
+
+.shortcut-action .btn {
+  gap: var(--space-8);
+}
+
+.home-footer {
+  flex-wrap: wrap;
+  width: 100%;
+  padding-top: var(--space-16);
+  border-top: 1px solid var(--color-divider);
+}
+
+@media (max-width: 700px) {
+  .app-nav {
+    flex-wrap: wrap;
+    column-gap: var(--space-12);
+    row-gap: 0;
+    padding: 12px 24px 0;
+  }
+
+  .app-nav nav {
+    order: 3;
+    width: 100%;
+    height: 44px;
+  }
+
+  .nav-tab {
+    padding-inline: 0;
+  }
+
+  .nav-account {
+    gap: var(--space-4);
+  }
+
+  .role-tag {
+    padding-inline: 6px;
+  }
+
+  .home-content {
+    gap: 28px;
+    padding: 28px 24px 40px;
+  }
+
+  .home-heading h1 {
+    font-size: 26px;
+  }
+
+  .section-heading {
+    flex-wrap: wrap;
+  }
+
+  .shortcut-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shortcut-card {
+    padding: 20px;
+  }
+}
