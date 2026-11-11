@@ -1,7 +1,8 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { queryClient } from './query-client';
 
 export type Role = 'colaborador' | 'operacoes';
-type Session = { token: string; role: Role };
+type Session = { token: string; role: Role; refreshToken?: string };
 type SessionContextValue = {
   session: Session | null;
   signIn: (session: Session) => void;
@@ -29,16 +30,33 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(readSession);
 
   function signOut() {
+    queryClient.clear();
     setSession(null);
     localStorage.removeItem('t');
     localStorage.removeItem('role');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem('session-id');
   }
 
   function signIn(next: Session) {
+    queryClient.clear();
+    localStorage.setItem('session-id', crypto.randomUUID());
     localStorage.setItem('t', next.token);
     localStorage.setItem('role', next.role);
+    if (next.refreshToken) localStorage.setItem('refresh', next.refreshToken);
+    else localStorage.removeItem('refresh');
     setSession(next);
   }
+
+  useEffect(() => {
+    const refreshed = () => setSession(readSession());
+    window.addEventListener('session-expired', signOut);
+    window.addEventListener('session-refreshed', refreshed);
+    return () => {
+      window.removeEventListener('session-expired', signOut);
+      window.removeEventListener('session-refreshed', refreshed);
+    };
+  });
 
   return <SessionContext.Provider value={{ session, signIn, signOut }}>{children}</SessionContext.Provider>;
 }

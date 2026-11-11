@@ -706,3 +706,28 @@ body {
     padding: 20px;
   }
 }
+.flow-heading { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:end; gap:20px; }
+.flow-heading h1 { margin:0; font-size:30px; }
+.flow-heading label { display:grid; gap:8px; min-width:220px; }
+.filter-row { display:flex; flex-wrap:wrap; gap:10px; }
+.equipment-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px; }
+.equipment-card { display:flex; flex-direction:column; gap:10px; padding:18px; background:var(--color-surface); border:1px solid var(--color-divider); border-radius:14px; }
+.equipment-card img { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:8px; }
+.equipment-card h2,.loan-row h2 { font-size:18px; margin:0; }
+.equipment-card p,.loan-row p { margin:0; }
+.equipment-card .btn { margin-top:auto; }
+.loan-list { display:grid; gap:14px; }
+.loan-row { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:22px; padding:20px; background:var(--color-surface); border:1px solid var(--color-divider); border-radius:12px; }
+.loan-row > div:first-child { flex:1; min-width:180px; overflow-wrap:anywhere; }
+.empty-state { padding:40px; text-align:center; border:1px dashed var(--color-divider); border-radius:12px; }
+.flow-error { color:var(--color-error-text); }
+.flow-overlay { position:fixed; inset:0; background:rgba(10,11,18,.72); z-index:100; }
+.flow-dialog { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(420px,calc(100vw - 32px)); max-height:90dvh; overflow:auto; padding:26px; background:var(--color-surface); color:var(--color-text); border:1px solid var(--color-divider); border-radius:14px; z-index:101; }
+.flow-dialog .filter-row { margin-top:24px; justify-content:end; }
+.app-nav nav { display:flex; flex-wrap:wrap; gap:12px; }
+@media(max-width:700px) { .app-nav { height:auto; flex-wrap:wrap; } .loan-row { align-items:start; } }
+.image-placeholder { display:grid; place-items:center; aspect-ratio:4/3; background:var(--color-bg); border:1px dashed var(--color-divider); border-radius:8px; }
+.equipment-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; padding:24px; background:var(--color-surface); border:1px solid var(--color-divider); border-radius:14px; }
+.equipment-form h2,.equipment-form > .filter-row { grid-column:1/-1; }
+.equipment-form label { display:grid; gap:8px; }
+@media(max-width:650px) { .equipment-form { grid-template-columns:1fr; } }

@@ -9,6 +9,8 @@ test.beforeEach(async ({ page }) => {
     if (url.hostname === '127.0.0.1' && url.port === '4173') await route.continue();
     else await route.abort();
   });
+  await page.route('**/v1/equipment*', route => route.fulfill({ json: { items: [], total: 0, available: 0, nextCursor: null } }));
+  await page.route('**/v1/loans/*', route => route.fulfill({ json: [] }));
 });
 
 async function mockLogin(page: Page, body: unknown, status = 200) {
@@ -111,7 +113,7 @@ test('test_ca_05_sair_limpa_sessao_e_impede_retorno', async ({ page }) => {
   await expect(page).toHaveURL('/');
 });
 
-test('test_ca_06_todos_destinos_mostram_em_breve_e_retornam_ao_inicio', async ({ page }) => {
+test('test_ca_06_todos_destinos_funcionais_retornam_ao_inicio', async ({ page }) => {
   await login(page, 'operacoes');
   for (const [action, path] of [
     ['Ver catálogo', '/catalogo'],
@@ -121,8 +123,8 @@ test('test_ca_06_todos_destinos_mostram_em_breve_e_retornam_ao_inicio', async ({
   ]) {
     await page.getByRole('link', { name: action }).click();
     await expect(page).toHaveURL(path);
-    await expect(page.getByRole('heading', { name: 'Em breve', exact: true })).toBeVisible();
-    await page.getByRole('link', { name: 'Voltar ao Início', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await page.getByRole('navigation').getByRole('link', { name: 'Início', exact: true }).click();
     await expect(page).toHaveURL('/home');
   }
   await page.goto('/catalogo');
