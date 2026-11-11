@@ -17,7 +17,8 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: PatrickXR/Patrickadas-Back
-          ref: ${{ vars.BACKEND_CONTRACT_REF || 'main' }}
+          # Pin the published API revision this client was generated against.
+          ref: ${{ vars.BACKEND_CONTRACT_REF || 'b432afa9e0d8683510f628409d14fef688b481c5' }}
           token: ${{ secrets.CONTRACT_REPO_TOKEN || github.token }}
           path: Backend
           persist-credentials: false
