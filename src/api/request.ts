@@ -1,3 +1,4 @@
+import { persistAuthSession } from '../supabase-session';
 const renewals = new Map<string, Promise<boolean>>();
 
 async function renew(base: string, refreshToken: string): Promise<boolean> {
@@ -13,6 +14,8 @@ async function renew(base: string, refreshToken: string): Promise<boolean> {
     if (localStorage.getItem('refresh') !== refreshToken) return false;
     if (typeof session.token !== 'string' || !session.token || typeof session.refreshToken !== 'string'
       || !session.refreshToken || !['colaborador', 'operacoes'].includes(session.role)) return false;
+    await persistAuthSession(session.token, session.refreshToken);
+    if (localStorage.getItem('refresh') !== refreshToken) return false;
     localStorage.setItem('t', session.token);
     localStorage.setItem('refresh', session.refreshToken);
     localStorage.setItem('role', session.role);

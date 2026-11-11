@@ -1,13 +1,21 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, NavLink, Link, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, NavLink, Link, Outlet } from 'react-router-dom';
 import Login from './pages/Login';
 import Home, { destinations } from './pages/Home';
 import { SessionProvider, useSession } from './session';
 import Catalog from './pages/Catalog';
 import Loans from './pages/Loans';
 import Equipment from './pages/Equipment';
+import { useEffect } from 'react';
+import { useUiStore } from './ui-store';
 
 function AppLayout() {
   const { session, signOut } = useSession();
+  const { toast, dismiss } = useUiStore();
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(dismiss, 2600);
+    return () => window.clearTimeout(timer);
+  }, [toast, dismiss]);
   if (!session) return <Navigate to="/" replace />;
 
   return (
@@ -31,25 +39,24 @@ function AppLayout() {
         </div>
       </header>
       <Outlet />
+      {toast && <div className="flow-toast" role="status">{toast.text}</div>}
     </div>
   );
 }
 
+const router = createBrowserRouter([
+  { path: '/', element: <Login /> },
+  { element: <AppLayout />, children: [
+    { path: '/home', element: <Home /> },
+    ...destinations.map(item => ({ path: item.path, element: item.path === '/catalogo' ? <Catalog /> : item.path === '/meus-emprestimos' ? <Loans /> : item.path === '/operacoes' ? <Loans operations /> : <Equipment /> })),
+  ] },
+  { path: '*', element: <Navigate to="/" replace /> },
+]);
+
 function App() {
   return (
     <SessionProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route element={<AppLayout />}>
-            <Route path="/home" element={<Home />} />
-            {destinations.map((item) => (
-              <Route key={item.path} path={item.path} element={item.path === '/catalogo' ? <Catalog /> : item.path === '/meus-emprestimos' ? <Loans /> : item.path === '/operacoes' ? <Loans operations /> : <Equipment />} />
-            ))}
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+      <RouterProvider router={router} />
     </SessionProvider>
   );
 }

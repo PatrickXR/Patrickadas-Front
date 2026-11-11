@@ -2,6 +2,11 @@ import { defineConfig } from 'orval';
 import { readFileSync, writeFileSync } from 'node:fs';
 
 export default defineConfig({
+  validation: {
+    input: '../Backend/openapi.json',
+    output: { target: './src/api/validation.ts', client: 'zod', clean: false,
+      override: { zod: { strict: { body: true } } } },
+  },
   patrickadas: {
     hooks: { afterAllFilesWrite: () => {
       const file = './src/api/generated.ts';

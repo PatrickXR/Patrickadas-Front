@@ -23,7 +23,7 @@ test('test_ca_01_ca_06_ca_09_ca_11_fluxo_real_cadastrar_solicitar_devolver_e_pre
   await page.getByLabel('Nome', { exact: true }).fill(name);
   await page.getByLabel('Patrimônio', { exact: true }).fill(name);
   await page.getByRole('button', { name: 'Cadastrar equipamento', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('Equipamento salvo');
+  await expect(page.getByRole('status').filter({ hasText: 'Equipamento salvo' })).toBeVisible();
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await login(page, false);
   await page.getByRole('link', { name: 'Catálogo', exact: true }).click();

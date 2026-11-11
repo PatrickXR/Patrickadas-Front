@@ -717,6 +717,31 @@ body {
 .equipment-card p,.loan-row p { margin:0; }
 .equipment-card .btn { margin-top:auto; }
 .loan-list { display:grid; gap:14px; }
+.flow-toast { position:fixed; left:50%; transform:translateX(-50%); bottom:28px; max-width:calc(100vw - 32px); padding:12px 20px; border-radius:999px; background:var(--color-accent-900); border:1px solid var(--color-accent-700); color:var(--color-accent-200); font-size:13.5px; z-index:110; }
+.loan-slots { display:flex; gap:8px; max-width:360px; margin:0 0 24px; }
+.loan-slots span { height:5px; flex:1; border-radius:8px; background:rgba(255,255,255,.12); }
+.loan-slots .occupied { background:var(--color-accent); }
+.loan-slots .overdue { background:var(--color-error-text); }
+.operations-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:0 0 24px; }
+.operations-kpis > div { padding:16px 18px; border:1px solid var(--color-divider); border-radius:12px; background:var(--color-surface); }
+.operations-kpis dt { font-size:12px; color:var(--color-text-muted); }
+.operations-kpis dd { font-size:30px; margin:8px 0 0; }
+.operations-table-scroll { max-width:100%; overflow:auto; border:1px solid var(--color-divider); border-radius:12px; }
+.operations-table { width:100%; border-collapse:collapse; text-align:left; }
+.operations-table th,.operations-table td { padding:16px; border-bottom:1px solid var(--color-divider); }
+.operations-table th { background:rgba(255,255,255,.05); font-size:12px; }
+.operations-table td { font-size:14px; }
+.operations-table .btn { white-space:nowrap; }
+.loan-rules { display:flex; flex-wrap:wrap; gap:20px; font-size:12.5px; margin-top:30px; }
+.equipment-workspace { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:34px; margin-bottom:28px; }
+.equipment-guidance section { margin-bottom:22px; padding:20px; border:1px solid var(--color-divider); border-radius:12px; }
+.equipment-guidance h2 { font-size:16px; }
+.equipment-guidance li { margin:12px 0; font-size:13px; }
+.loan-row { border-left:3px solid var(--color-accent); }
+.loan-overdue { border-left-color:var(--color-error-text); }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+@media(max-width:900px) { .equipment-workspace { grid-template-columns:1fr; } }
+@media(max-width:650px) { .operations-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .loan-row { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:22px; padding:20px; background:var(--color-surface); border:1px solid var(--color-divider); border-radius:12px; }
 .loan-row > div:first-child { flex:1; min-width:180px; overflow-wrap:anywhere; }
 .empty-state { padding:40px; text-align:center; border:1px dashed var(--color-divider); border-radius:12px; }

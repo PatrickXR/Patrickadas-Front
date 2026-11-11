@@ -18,7 +18,7 @@ jobs:
         with:
           repository: PatrickXR/Patrickadas-Back
           # Pin the published API revision this client was generated against.
-          ref: ${{ vars.BACKEND_CONTRACT_REF || 'b432afa9e0d8683510f628409d14fef688b481c5' }}
+          ref: ${{ vars.BACKEND_CONTRACT_REF || '6c7a18ff77e266d611b576df870dfa28314538b2' }}
           token: ${{ secrets.CONTRACT_REPO_TOKEN || github.token }}
           path: Backend
           persist-credentials: false

@@ -1,26 +1,31 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { isRole, useSession, type Role } from '../session';
+import { authControllerLoginBody } from '../api/validation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { LoginRequestDto } from '../api/generated';
 export default function Login() {
   const nav = useNavigate();
   const { session, signIn } = useSession();
-  const [email, setEmail] = useState('');
-  const [pwd, setPwd] = useState('');
+  const { register, setValue, getValues, trigger } = useForm<LoginRequestDto>({ resolver: zodResolver(authControllerLoginBody), defaultValues: { email: '', password: '', expectedRole: 'colaborador' } });
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState<Role | null>(null);
   async function go(role: Role) {
     setErr('');
+    setValue('expectedRole', role);
+    if (!await trigger()) { setErr('Informe um e-mail válido e a senha.'); return; }
     setBusy(role);
     try {
       const base = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/v1';
-      const r = await fetch(base + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pwd, expectedRole: role }) });
+      const r = await fetch(base + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(getValues()) });
       const b = await r.json().catch(() => ({}));
       if (!r.ok) { setErr(b.detail || 'E-mail ou senha incorretos.'); return; }
       if (typeof b.token !== 'string' || !b.token.trim() || !isRole(b.role) || b.role !== role) {
         setErr('Não foi possível validar sua sessão. Tente entrar novamente.');
         return;
       }
-      signIn({ token: b.token, role: b.role, refreshToken: b.refreshToken });
+      await signIn({ token: b.token, role: b.role, refreshToken: b.refreshToken });
       nav('/home', { replace: true });
     } catch { setErr('Sem conexão com o servidor.'); }
     finally { setBusy(null); }
@@ -55,11 +60,11 @@ export default function Login() {
           <div className="login-fields">
             <div className="field">
               <label htmlFor="login-email">E-mail</label>
-              <input id="login-email" name="email" className="input" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" />
+              <input id="login-email" className="input" type="email" autoComplete="username" {...register('email')} placeholder="voce@empresa.com" />
             </div>
             <div className="field">
               <label htmlFor="login-password">Senha</label>
-              <input id="login-password" name="password" className="input" type="password" autoComplete="current-password" value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Sua senha" />
+              <input id="login-password" className="input" type="password" autoComplete="current-password" {...register('password')} placeholder="Sua senha" />
             </div>
           </div>
           <div className="login-actions">
