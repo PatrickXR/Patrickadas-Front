@@ -36,7 +36,6 @@ export default function Home() {
                 <p>{item.description}</p>
               </div>
               <div className="shortcut-action">
-                <span className="availability-note">Em breve</span>
                 <Link className="btn btn-primary" to={item.path}>{item.action}<span aria-hidden="true"> →</span></Link>
               </div>
             </article>

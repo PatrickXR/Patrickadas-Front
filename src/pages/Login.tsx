@@ -20,7 +20,7 @@ export default function Login() {
         setErr('Não foi possível validar sua sessão. Tente entrar novamente.');
         return;
       }
-      signIn({ token: b.token, role: b.role });
+      signIn({ token: b.token, role: b.role, refreshToken: b.refreshToken });
       nav('/home', { replace: true });
     } catch { setErr('Sem conexão com o servidor.'); }
     finally { setBusy(null); }

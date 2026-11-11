@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate, NavLink, Link, Outlet
 import Login from './pages/Login';
 import Home, { destinations } from './pages/Home';
 import { SessionProvider, useSession } from './session';
+import Catalog from './pages/Catalog';
+import Loans from './pages/Loans';
+import Equipment from './pages/Equipment';
 
 function AppLayout() {
   const { session, signOut } = useSession();
@@ -17,6 +20,10 @@ function AppLayout() {
         </Link>
         <nav aria-label="Navegação principal">
           <NavLink to="/home" className="nav-tab">Início</NavLink>
+          <NavLink to="/catalogo" className="nav-tab">Catálogo</NavLink>
+          <NavLink to="/meus-emprestimos" className="nav-tab">Meus empréstimos</NavLink>
+          {session.role === 'operacoes' && <NavLink to="/operacoes" className="nav-tab">Operações</NavLink>}
+          {session.role === 'operacoes' && <NavLink to="/equipamentos" className="nav-tab">Equipamentos</NavLink>}
         </nav>
         <div className="nav-account">
           <span className="role-tag">{session.role === 'operacoes' ? 'Operações' : 'Colaborador'}</span>
@@ -25,22 +32,6 @@ function AppLayout() {
       </header>
       <Outlet />
     </div>
-  );
-}
-
-function ComingSoon({ title, operationsOnly }: { title: string; operationsOnly: boolean }) {
-  const { session } = useSession();
-  if (operationsOnly && session?.role !== 'operacoes') return <Navigate to="/home" replace />;
-
-  return (
-    <main className="home-content" id="content">
-      <header className="home-heading">
-        <p className="section-kicker">{title}</p>
-        <h1>Em breve</h1>
-        <p>Esta área ainda está em desenvolvimento.</p>
-      </header>
-      <Link className="btn btn-primary" to="/home">Voltar ao Início</Link>
-    </main>
   );
 }
 
@@ -53,7 +44,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/home" element={<Home />} />
             {destinations.map((item) => (
-              <Route key={item.path} path={item.path} element={<ComingSoon title={item.title} operationsOnly={item.operationsOnly} />} />
+              <Route key={item.path} path={item.path} element={item.path === '/catalogo' ? <Catalog /> : item.path === '/meus-emprestimos' ? <Loans /> : item.path === '/operacoes' ? <Loans operations /> : <Equipment />} />
             ))}
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

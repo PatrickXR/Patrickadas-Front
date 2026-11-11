@@ -1,0 +1,36 @@
+name: Frontend and API contract
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  contract-and-ui:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: Frontend
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: Frontend
+          persist-credentials: false
+      - name: Read the API contract from its repository
+        uses: actions/checkout@v7
+        with:
+          repository: PatrickXR/Patrickadas-Back
+          ref: ${{ vars.BACKEND_CONTRACT_REF || 'main' }}
+          token: ${{ secrets.CONTRACT_REPO_TOKEN || github.token }}
+          path: Backend
+          persist-credentials: false
+          sparse-checkout: openapi.json
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run api:check
+      - run: npm run test:unit
+      - run: npm run build
+      - run: npx playwright install --with-deps chrome
+      - run: npm test -- e2e/home.spec.ts e2e/session.spec.ts
