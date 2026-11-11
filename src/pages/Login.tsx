@@ -5,6 +5,7 @@ import { authControllerLoginBody } from '../api/validation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { LoginRequestDto } from '../api/generated';
+import { SessionInitializationError } from '../supabase-session';
 export default function Login() {
   const nav = useNavigate();
   const { session, signIn } = useSession();
@@ -27,7 +28,7 @@ export default function Login() {
       }
       await signIn({ token: b.token, role: b.role, refreshToken: b.refreshToken });
       nav('/home', { replace: true });
-    } catch { setErr('Sem conexão com o servidor.'); }
+    } catch (error) { setErr(error instanceof SessionInitializationError ? error.message : 'Sem conexão com o servidor.'); }
     finally { setBusy(null); }
   }
   if (session) return <Navigate to="/home" replace />;
