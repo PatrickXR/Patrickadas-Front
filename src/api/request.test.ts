@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { apiRequest } from './request';
+vi.mock('../supabase-session', () => ({ persistAuthSession: vi.fn(async () => undefined) }));
 
 const storage = new Map<string, string>();
 const response = (status: number, body: unknown = {}) => new Response(JSON.stringify(body), { status });

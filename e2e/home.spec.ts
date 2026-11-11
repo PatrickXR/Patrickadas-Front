@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { fixtureToken, mockSdkAuth } from './auth-fixture';
 
 type Role = 'colaborador' | 'operacoes';
 
@@ -11,9 +12,13 @@ test.beforeEach(async ({ page }) => {
   });
   await page.route('**/v1/equipment*', route => route.fulfill({ json: { items: [], total: 0, available: 0, nextCursor: null } }));
   await page.route('**/v1/loans/*', route => route.fulfill({ json: [] }));
+  await mockSdkAuth(page);
 });
 
 async function mockLogin(page: Page, body: unknown, status = 200) {
+  if (typeof body === 'object' && body && 'token' in body && body.token === 'local-test-token') {
+    body = { ...body, token: fixtureToken('login'), refreshToken: 'fixture-refresh' };
+  }
   await page.route('**/auth/login', (route) => route.fulfill({ status, json: body }));
 }
 
@@ -68,6 +73,8 @@ for (const failure of [
   test(`test_ca_01_${failure.name}_permanece_no_login`, async ({ page }) => {
     await mockLogin(page, failure.body, failure.status);
     await page.goto('/');
+    await page.getByLabel('E-mail', { exact: true }).fill('fixture@example.invalid');
+    await page.getByLabel('Senha', { exact: true }).fill('fixture-password');
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
     await expect(page.getByRole('alert')).toHaveText(failure.body.detail);
     await expect(page).toHaveURL('/');
@@ -86,6 +93,8 @@ for (const invalid of [
   test(`test_ca_05_${invalid.name}_nao_cria_sessao`, async ({ page }) => {
     await mockLogin(page, invalid.body);
     await page.goto('/');
+    await page.getByLabel('E-mail', { exact: true }).fill('fixture@example.invalid');
+    await page.getByLabel('Senha', { exact: true }).fill('fixture-password');
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
     await expect(page.getByRole('alert')).toHaveText('Não foi possível validar sua sessão. Tente entrar novamente.');
     await expect.poll(() => page.evaluate(() => localStorage.getItem('t'))).toBeNull();
@@ -164,4 +173,23 @@ test('test_ca_07_teclado_acessa_atalhos_e_sair_com_foco_visivel', async ({ page 
   await page.getByRole('button', { name: 'Sair' }).focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL('/');
+});
+
+test('CA-007-02 busca pelo nome exibido e indicadores reais de Operações', async ({ page }, info) => {
+  await login(page, 'operacoes');
+  await page.route('**/v1/loans/open', route => route.fulfill({ json: [{
+    id: '88000000-0000-4000-8000-000000000002', userId: '88000000-0000-4000-8000-000000000001',
+    userName: 'Ana Fixture', borrowedAt: '2026-01-01T12:00:00Z', dueOn: '2026-01-15',
+    equipment: { id: '88000000-0000-4000-8000-000000000003', nome: 'Monitor fixture', patrimonio: 'LOCAL-1', categoria: 'monitor' },
+  }] }));
+  await page.route('**/v1/equipment*', route => route.fulfill({ json: { items: [], total: 12, available: 8, maintenance: 3, nextCursor: null } }));
+  await page.getByRole('navigation').getByRole('link', { name: 'Operações', exact: true }).click();
+  await expect(page.locator('.operations-kpis dd')).toHaveText(['1', '1', '8', '3']);
+  await page.getByLabel('Buscar empréstimo').fill('ANA FIXTURE');
+  await expect(page.getByRole('cell', { name: 'Ana Fixture', exact: true })).toBeVisible();
+  await page.getByLabel('Buscar empréstimo').fill('sem resultado');
+  await expect(page.locator('tbody tr')).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByLabel('Buscar empréstimo').fill('');
+  await page.screenshot({ path: info.outputPath('operacoes.png'), fullPage: true });
 });

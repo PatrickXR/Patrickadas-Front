@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,31 +7,34 @@ import { z } from 'zod';
 import * as Dialog from '@radix-ui/react-dialog';
 import { equipmentControllerCreate, equipmentControllerList, equipmentControllerRemove, equipmentControllerUpdate, type CatalogResponseDtoItemsItem, type EquipmentInputDto } from '../api/generated';
 import { useSession } from '../session';
+import { equipmentControllerCreateBody } from '../api/validation';
+import { useUiStore } from '../ui-store';
 
-const schema = z.object({ nome: z.string().trim().min(1, 'Informe o nome'), patrimonio: z.string().trim().min(1, 'Informe o patrimônio'),
-  categoria: z.enum(['notebook','monitor','cabo','camera']), situacao: z.enum(['disponivel','manutencao']), observacoes: z.string().max(2000) });
+const schema = equipmentControllerCreateBody;
 type Form = z.infer<typeof schema>;
 const defaults: Form = { nome: '', patrimonio: '', categoria: 'notebook', situacao: 'disponivel', observacoes: '' };
 
 export default function Equipment() {
   const { session } = useSession();
   const client = useQueryClient();
+  const navigate = useNavigate();
+  const notify = useUiStore(state => state.notify);
   const [editing, setEditing] = useState<string>();
   const [deleting, setDeleting] = useState<CatalogResponseDtoItemsItem | null>(null);
   const [cursor, setCursor] = useState<string>();
-  const [message, setMessage] = useState('');
   const form = useForm<Form>({ resolver: zodResolver(schema), defaultValues: defaults });
   const items = useQuery({ queryKey: ['equipment-management', cursor], queryFn: () => equipmentControllerList({ limit: 100, cursor }), enabled: session?.role === 'operacoes' });
   const save = useMutation({ mutationFn: (data: EquipmentInputDto) => editing ? equipmentControllerUpdate(editing, data) : equipmentControllerCreate(data), onSuccess: () => {
-    form.reset(defaults); setEditing(undefined); setMessage('Equipamento salvo.'); void client.invalidateQueries();
+    form.reset(defaults); setEditing(undefined); notify('Equipamento salvo.'); void client.invalidateQueries();
+    if (!editing) navigate('/operacoes');
   } });
   const remove = useMutation({ mutationFn: (id: string) => equipmentControllerRemove(id), onSuccess: () => {
-    setDeleting(null); setMessage('Equipamento excluído.'); void client.invalidateQueries();
+    setDeleting(null); notify('Equipamento excluído.'); void client.invalidateQueries();
   } });
   if (session?.role !== 'operacoes') return <Navigate to="/home" replace />;
   return <main className="home-content" id="content">
     <header className="flow-heading"><div><h1>Equipamentos</h1><p>Cadastre e gerencie o acervo.</p></div></header>
-    <form className="equipment-form" onSubmit={form.handleSubmit(data => save.mutate(data))}>
+    <div className="equipment-workspace"><form className="equipment-form" onSubmit={form.handleSubmit(data => save.mutate(data))}>
       <h2>{editing ? 'Editar equipamento' : 'Cadastrar equipamento'}</h2>
       <label>Nome<input className="input" {...form.register('nome')} /></label>
       <label>Patrimônio<input className="input" {...form.register('patrimonio')} /></label>
@@ -41,9 +44,8 @@ export default function Equipment() {
       {Object.entries(form.formState.errors).map(([key,error]) => <p role="alert" className="flow-error" key={key}>{error.message}</p>)}
       {save.error && <p role="alert" className="flow-error">{save.error.message}</p>}
       <div className="filter-row"><button className="btn btn-primary" disabled={save.isPending}>{save.isPending ? 'Salvando…' : editing ? 'Salvar alterações' : 'Cadastrar equipamento'}</button>
-        {editing && <button type="button" className="btn" onClick={() => { setEditing(undefined); form.reset(defaults); save.reset(); }}>Cancelar edição</button>}</div>
-    </form>
-    {message && <p role="status">{message}</p>}
+        {editing ? <button type="button" className="btn" onClick={() => { setEditing(undefined); form.reset(defaults); save.reset(); }}>Cancelar edição</button> : <Link className="btn" to="/operacoes">Cancelar</Link>}</div>
+    </form><aside className="equipment-guidance"><section><h2>Regras em vigor</h2><ul><li>Até 3 empréstimos ativos por pessoa</li><li>Prazo de 14 dias corridos</li><li>Atrasos bloqueiam novas solicitações</li><li>Histórico de empréstimos preservado</li></ul></section><section><h2>Fora desta versão</h2><ul><li>Reserva com data futura</li><li>Notificação por e-mail</li><li>Importação da planilha</li></ul></section></aside></div>
     {items.isPending && <p role="status">Carregando equipamentos…</p>}
     {items.error && <div role="alert"><p>{items.error.message}</p><button className="btn" onClick={() => void items.refetch()}>Tentar novamente</button></div>}
     <div className="loan-list">{items.data?.items.map(item => <article className="loan-row" key={item.id}>

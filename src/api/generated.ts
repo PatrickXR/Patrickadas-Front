@@ -5,7 +5,40 @@
  * OpenAPI spec version: 1
  */
 import { apiRequest } from './request';
-export interface LoginRequestDto { [key: string]: unknown }
+export type ProblemDetailsDtoType = typeof ProblemDetailsDtoType[keyof typeof ProblemDetailsDtoType];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ProblemDetailsDtoType = {
+  'about:blank': 'about:blank',
+} as const;
+
+export interface ProblemDetailsDto {
+  type: ProblemDetailsDtoType;
+  title: string;
+  status: number;
+  code?: string;
+  detail?: string;
+}
+
+export type LoginRequestDtoExpectedRole = typeof LoginRequestDtoExpectedRole[keyof typeof LoginRequestDtoExpectedRole];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LoginRequestDtoExpectedRole = {
+  colaborador: 'colaborador',
+  operacoes: 'operacoes',
+} as const;
+
+export interface LoginRequestDto {
+  email: string;
+  /**
+   * @minLength 1
+   * @maxLength 4096
+   */
+  password: string;
+  expectedRole: LoginRequestDtoExpectedRole;
+}
 
 export type LoginResponseDtoRole = typeof LoginResponseDtoRole[keyof typeof LoginResponseDtoRole];
 
@@ -21,22 +54,6 @@ export interface LoginResponseDto {
   refreshToken?: string;
   role: LoginResponseDtoRole;
   userId: string;
-}
-
-export type ProblemDetailsDtoType = typeof ProblemDetailsDtoType[keyof typeof ProblemDetailsDtoType];
-
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ProblemDetailsDtoType = {
-  'about:blank': 'about:blank',
-} as const;
-
-export interface ProblemDetailsDto {
-  type: ProblemDetailsDtoType;
-  title: string;
-  status: number;
-  code?: string;
-  detail?: string;
 }
 
 export interface RefreshRequestDto {
@@ -63,6 +80,7 @@ export type CatalogResponseDtoItemsItem = {
 export interface CatalogResponseDto {
   total: number;
   available: number;
+  maintenance: number;
   /** @nullable */
   nextCursor: string | null;
   items: CatalogResponseDtoItemsItem[];
