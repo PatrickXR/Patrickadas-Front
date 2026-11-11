@@ -193,3 +193,15 @@ test('CA-007-02 busca pelo nome exibido e indicadores reais de Operações', asy
   await page.getByLabel('Buscar empréstimo').fill('');
   await page.screenshot({ path: info.outputPath('operacoes.png'), fullPage: true });
 });
+
+test('CA-009-02 falha ao validar sessão não é apresentada como falha de rede', async ({ page }) => {
+  await mockLogin(page, { token: 'local-test-token', role: 'operacoes', userId: 'local-test-user' });
+  await page.route('**/auth/v1/user', route => route.fulfill({ status: 401, json: { message: 'invalid fixture token' } }));
+  await page.goto('/');
+  await page.getByLabel('E-mail', { exact: true }).fill('fixture@example.invalid');
+  await page.getByLabel('Senha', { exact: true }).fill('fixture-local-only');
+  await page.getByRole('button', { name: 'Entrar como Operações' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Não foi possível validar sua sessão. Entre novamente.');
+  await expect(page).toHaveURL('/');
+  expect(await page.evaluate(() => localStorage.getItem('t'))).toBeNull();
+});
