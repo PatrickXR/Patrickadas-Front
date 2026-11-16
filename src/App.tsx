@@ -34,6 +34,7 @@ function AppLayout() {
           {session.role === 'operacoes' && <NavLink to="/equipamentos" className="nav-tab">Equipamentos</NavLink>}
         </nav>
         <div className="nav-account">
+          {session.email && <span className="account-email" title={session.email}>{session.email}</span>}
           <span className="role-tag">{session.role === 'operacoes' ? 'Operações' : 'Colaborador'}</span>
           <button className="btn btn-ghost" onClick={signOut}>Sair</button>
         </div>

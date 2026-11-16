@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { fixtureToken, mockSdkAuth } from './auth-fixture';
 
-test('CA-009-01 CA-009-02 token expirado renova no catálogo sem novo login', async ({ page }) => {
+test('CA-009-01 CA-009-02 CA-011-02 token expirado renova no catálogo sem novo login', async ({ page }) => {
   let refreshCalls = 0;
   const expired = fixtureToken('server-rejected');
   const renewed = fixtureToken('renewed');
@@ -30,10 +30,14 @@ test('CA-009-01 CA-009-02 token expirado renova no catálogo sem novo login', as
   await page.getByLabel('Senha', { exact: true }).fill('fixture-local-only');
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await expect(page).toHaveURL('/home');
+  await expect(page.locator('.account-email')).toHaveText('fixture@example.invalid');
   await page.goto('/catalogo');
   await expect.poll(() => page.evaluate(() => localStorage.getItem('t'))).toBe(renewed);
   await expect(page).toHaveURL('/catalogo');
   expect(refreshCalls).toBe(1);
+  await expect(page.locator('.account-email')).toHaveText('fixture@example.invalid');
+  await page.reload();
+  await expect(page.locator('.account-email')).toHaveText('fixture@example.invalid');
   expect(await page.evaluate(() => localStorage.getItem('refresh'))).toBe('rotated-fixture');
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await expect(page).toHaveURL('/');

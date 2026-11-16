@@ -32,19 +32,58 @@ async function login(page: Page, role: Role) {
 }
 
 for (const role of ['colaborador', 'operacoes'] as const) {
-  test(`test_ca_01_ca_02_login_${role}_abre_home_com_papel_real`, async ({ page }) => {
+  test(`CA-011-01 CA-011-02 test_ca_01_ca_02_login_${role}_abre_home_com_papel_real`, async ({ page }) => {
     await login(page, role);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Boas-vindas ao EMPREST.AI');
     await expect(page.getByRole('link', { name: 'EMPREST.AI — Início' })).toBeVisible();
     await expect(page.locator('.role-tag')).toHaveText(role === 'operacoes' ? 'Operações' : 'Colaborador');
+    await expect(page.locator('.account-email')).toHaveText('fixture@example.invalid');
     await expect(page.getByText('Os equipamentos de que você precisa. Os empréstimos sob controle.')).toBeVisible();
     await expect(page.getByRole('article')).toHaveCount(role === 'operacoes' ? 4 : 2);
     await page.reload();
+    await expect(page.locator('.account-email')).toHaveText('fixture@example.invalid');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await page.goto('/');
     await expect(page).toHaveURL('/home');
   });
 }
+
+test('CA-011-02 sair e trocar conta substitui o e-mail da sessão', async ({ page }) => {
+  await login(page, 'colaborador');
+  await expect(page.locator('.account-email')).toHaveText('fixture@example.invalid');
+  await page.getByRole('button', { name: 'Sair', exact: true }).click();
+  await expect(page).toHaveURL('/');
+  await expect(page.locator('.account-email')).toHaveCount(0);
+  await mockSdkAuth(page, 'outra-conta@example.invalid');
+  await login(page, 'operacoes');
+  await expect(page.locator('.account-email')).toHaveText('outra-conta@example.invalid');
+  await page.reload();
+  await expect(page.locator('.account-email')).toHaveText('outra-conta@example.invalid');
+});
+
+test('CA-011-03 e-mail longo mantém controles visíveis sem sobreposição', async ({ page }, info) => {
+  const email = `${'usuario'.repeat(9)}@${'departamento.'.repeat(3)}example.invalid`;
+  await mockSdkAuth(page, email);
+  await login(page, 'operacoes');
+  await expect(page.locator('.account-email')).toHaveText(email);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await expect(page.getByRole('button', { name: 'Sair', exact: true })).toBeInViewport();
+  const emailBox = await page.locator('.account-email').boundingBox();
+  const roleBox = await page.locator('.role-tag').boundingBox();
+  expect(emailBox!.x + emailBox!.width).toBeLessThanOrEqual(roleBox!.x);
+  await page.screenshot({ path: info.outputPath('email-usuario.png'), fullPage: true });
+});
+
+test('CA-011-03 sessão sem e-mail continua utilizável sem identificação inventada', async ({ page }) => {
+  await mockSdkAuth(page, null);
+  await login(page, 'colaborador');
+  await expect(page.locator('.account-email')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.locator('.account-email')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Sair', exact: true }).click();
+  await expect(page).toHaveURL('/');
+});
 
 test('test_ca_03_colaborador_tem_apenas_dois_atalhos', async ({ page }) => {
   await login(page, 'colaborador');
