@@ -518,9 +518,23 @@ body {
 .nav-account {
   display: flex;
   flex: 1;
+  min-width: 0;
   justify-content: flex-end;
   align-items: center;
   gap: var(--space-12);
+}
+
+.account-email {
+  min-width: 0;
+  max-width: 240px;
+  overflow-wrap: anywhere;
+  color: var(--color-text-label);
+  font-size: var(--font-size-note);
+}
+
+.nav-account .role-tag,
+.nav-account .btn {
+  flex-shrink: 0;
 }
 
 .role-tag {
@@ -678,6 +692,9 @@ body {
   }
 
   .nav-account {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    padding-block: var(--space-4);
     gap: var(--space-4);
   }
 

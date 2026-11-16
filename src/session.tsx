@@ -4,7 +4,7 @@ import { authClient, persistAuthSession } from './supabase-session';
 import { useUiStore } from './ui-store';
 
 export type Role = 'colaborador' | 'operacoes';
-type Session = { token: string; role: Role; refreshToken?: string };
+type Session = { token: string; role: Role; refreshToken?: string; email?: string };
 type SessionContextValue = {
   session: Session | null;
   signIn: (session: Session) => Promise<void>;
@@ -44,7 +44,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   async function signIn(next: Session) {
     const persisted = await persistAuthSession(next.token, next.refreshToken);
-    next = { ...next, token: persisted.access_token, refreshToken: persisted.refresh_token };
+    next = { ...next, token: persisted.access_token, refreshToken: persisted.refresh_token, email: persisted.user.email };
     queryClient.clear();
     useUiStore.getState().dismiss();
     localStorage.setItem('session-id', crypto.randomUUID());
@@ -56,17 +56,31 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    let active = true;
+    const refreshed = async () => {
+      const token = localStorage.getItem('t');
+      const result = await authClient?.auth.getSession();
+      const current = readSession();
+      if (!active || current?.token !== token) return;
+      const restored = result?.data.session;
+      setSession(current ? {
+        ...current,
+        email: restored?.access_token === current.token ? restored.user.email : undefined,
+      } : null);
+    };
     const listener = authClient?.auth.onAuthStateChange((event, next) => {
       if (event === 'TOKEN_REFRESHED' && next && localStorage.getItem('session-id')) {
         localStorage.setItem('t', next.access_token);
         localStorage.setItem('refresh', next.refresh_token);
-        setSession(readSession());
+        const current = readSession();
+        setSession(current ? { ...current, email: next.user.email } : null);
       }
     });
-    const refreshed = () => setSession(readSession());
+    void refreshed();
     window.addEventListener('session-expired', signOut);
     window.addEventListener('session-refreshed', refreshed);
     return () => {
+      active = false;
       window.removeEventListener('session-expired', signOut);
       window.removeEventListener('session-refreshed', refreshed);
       listener?.data.subscription.unsubscribe();
